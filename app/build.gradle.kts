@@ -62,6 +62,9 @@ dependencies {
     // Coil (Images)
     implementation(libs.coil.compose)
 
+    // ML Kit Text Recognition
+    implementation(libs.mlkit.text.recognition)
+
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)

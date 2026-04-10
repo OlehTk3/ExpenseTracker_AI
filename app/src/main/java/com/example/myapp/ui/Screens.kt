@@ -1,6 +1,7 @@
 package com.example.myapp.ui
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -24,6 +25,7 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapp.data.Expense
+import com.example.myapp.util.TextRecognitionHelper
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,6 +99,7 @@ fun AddExpenseScreen(
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
+    var isProcessing by remember { mutableStateOf(false) } // Состояние нейросети
     
     // Загружаем данные если это редактирование
     LaunchedEffect(expenseId) {
@@ -124,11 +127,31 @@ fun AddExpenseScreen(
         )
     }
 
+    // Обработка текста после снимка
+    val onPhotoTaken = { uri: Uri ->
+        isProcessing = true
+        TextRecognitionHelper.recognizeText(
+            context = context,
+            uri = uri,
+            onSuccess = { recognizedTitle, recognizedAmount ->
+                isProcessing = false
+                if (recognizedTitle.isNotBlank()) title = recognizedTitle
+                if (recognizedAmount != null) amount = recognizedAmount.toString()
+                Toast.makeText(context, "Текст распознан!", Toast.LENGTH_SHORT).show()
+            },
+            onError = { e ->
+                isProcessing = false
+                Toast.makeText(context, "Ошибка OCR: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
                 photoUri = tempUri
+                onPhotoTaken(tempUri) // Запускаем нейросеть
             }
         }
     )
@@ -154,6 +177,12 @@ fun AddExpenseScreen(
                 label = { Text("Сумма") },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Индикатор загрузки нейросети
+            if (isProcessing) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text("Нейросеть читает чек...", modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
 
             // Отображение фото с кнопкой удаления
             if (photoUri != null) {
@@ -191,9 +220,10 @@ fun AddExpenseScreen(
 
             Button(
                 onClick = { cameraLauncher.launch(tempUri) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isProcessing
             ) {
-                Text(text = if (photoUri != null) "Переснять фото" else "Сделать фото чека")
+                Text(text = if (photoUri != null) "Переснять фото (OCR)" else "Сфотографировать чек (AI)")
             }
 
             Spacer(modifier = Modifier.weight(1f))
