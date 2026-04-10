@@ -61,7 +61,7 @@
 ---
 
 ## 6. Стъпки за стартиране
-1.  Клонирайте репозиторито: `git clone https://github.com/ВАШИЯТ_ПРОФИЛ/courseWork_AI.git`
+1.  Клонирайте репозиторито: `git clone https://github.com/OlehTk3/courseWork_AI.git`
 2.  Вземете безплатен API ключ от [Google AI Studio](https://aistudio.google.com/app/apikey).
 3.  Добавете ключа в проекта (във файл `local.properties` или директно в конфигурацията на приложението).
 4.  Стартирайте проекта чрез Android Studio.
