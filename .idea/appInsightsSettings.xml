@@ -3,7 +3,7 @@
   <component name="AppInsightsSettings">
     <option name="tabSettings">
       <map>
-        <entry key="Firebase Crashlytics">
+        <entry   key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
               <option name="connection">
